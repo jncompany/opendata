@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: opendata
+    
+server:
+  port: 8090
+  
+logging:
+  level:
+    root: info
+    com:
+      mhkim: debug
+
