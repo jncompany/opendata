@@ -1,44 +1,62 @@
 package com.mhkim.opendata.service;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
+import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
+import com.mhkim.opendata.dto.FlightItem;
+import com.mhkim.opendata.dto.FlightItems;
+import com.mhkim.opendata.entity.Flight;
+import com.mhkim.opendata.repository.FlightRepository;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class FlightService {
 
-    public static final String SERVICE_KEY = "service_key";
+    private final FlightRepository flightRepository;
+    private final FlightRequestService flightRequestService;
 
-    public void getFlightInfo() {
+    public void syncFlight() {
 
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("http://openapi.tago.go.kr/openapi/service");
-        factory.setEncodingMode(EncodingMode.VALUES_ONLY);
+        flightRequestService.requestFlight(1).subscribe(flightInfo -> {
+            log.debug("flightInfo: {}", flightInfo);
 
-        WebClient client = WebClient.builder().uriBuilderFactory(factory)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            int total = flightInfo.getTotalCount();
+            int numOfRows = flightInfo.getNumOfRows();
+            int maxPage = total / numOfRows;
+            if (total % numOfRows > 0)
+                maxPage++;
+
+            Flux<FlightItems> flightItems = Flux.range(1, maxPage).flatMap(pageNo -> {
+                log.debug("pageNo: {}", pageNo);
+                return flightRequestService.requestFlight(pageNo);
+            });
+
+            flightItems.subscribe(items ->
+                items.getFlightItems().forEach(item -> {
+                    log.debug("item: {}", items.toString());
+                    addBoard(item);
+                })
+            );
+        });
+    }
+
+    public Optional<Flight> addBoard(FlightItem item) {
+        Flight flight = Flight.builder()
+                .airlineNm(item.getAirlineNm())
+                .arrAirportNm(item.getArrAirportNm())
+                .arrPlandTime(item.getArrPlandTime())
+                .depAirportNm(item.getDepAirportNm())
+                .depPlandTime(item.getDepPlandTime())
+                .vihicleId(item.getVihicleId())
                 .build();
-
-        Mono<String> result = client.get()
-                .uri(uriBuilder -> uriBuilder.path("/DmstcFlightNvgInfoService/getFlightOpratInfoList")
-                        .queryParam("serviceKey", SERVICE_KEY)
-                        .queryParam("numOfRows", "10")
-                        .queryParam("pageNo", "1")
-                        .queryParam("depAirportId", "NAARKSS")
-                        .queryParam("arrAirportId", "NAARKPC")
-                        .queryParam("depPlandTime", "20210601")
-                        .queryParams(null)
-                        //.queryParam("airlineId", "JJA")
-                        .build()
-                ).accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class);
-
-        result.subscribe(data -> log.debug("{}", data));
+        flightRepository.save(flight);
+        return Optional.of(flightRepository.save(flight));
     }
 
 }
