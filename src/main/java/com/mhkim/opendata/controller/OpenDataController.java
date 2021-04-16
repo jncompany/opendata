@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mhkim.opendata.service.FlightService;
+import com.mhkim.opendata.service.FlightInfoService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -13,11 +13,11 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/opendata")
 public class OpenDataController {
 
-    private final FlightService flightService;
+    private final FlightInfoService flightService;
 
-    @PostMapping(value = "/flight/sync")
-    public void syncFlight() {
-        flightService.syncFlight();
+    @PostMapping(value = "/flightinfo/sync")
+    public void syncFlightInfo() {
+        flightService.syncFlightInfo();
     }
 
 }

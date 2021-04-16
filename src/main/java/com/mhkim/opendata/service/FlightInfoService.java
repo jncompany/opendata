@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.mhkim.opendata.dto.FlightItem;
-import com.mhkim.opendata.dto.FlightItems;
-import com.mhkim.opendata.entity.Flight;
-import com.mhkim.opendata.repository.FlightRepository;
+import com.mhkim.opendata.dto.FlightInfoItem;
+import com.mhkim.opendata.dto.FlightInfoItems;
+import com.mhkim.opendata.entity.FlightInfo;
+import com.mhkim.opendata.repository.FlightInfoRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,14 +16,14 @@ import reactor.core.publisher.Flux;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class FlightService {
+public class FlightInfoService {
 
-    private final FlightRepository flightRepository;
-    private final FlightRequestService flightRequestService;
+    private final FlightInfoRepository flightInfoRepository;
+    private final FlightInfoRequestService flightInfoRequestService;
 
-    public void syncFlight() {
+    public void syncFlightInfo() {
 
-        flightRequestService.requestFlight(1).subscribe(flightInfo -> {
+        flightInfoRequestService.requestFlightInfo(1).subscribe(flightInfo -> {
             log.debug("flightInfo: {}", flightInfo);
 
             int total = flightInfo.getTotalCount();
@@ -32,13 +32,13 @@ public class FlightService {
             if (total % numOfRows > 0)
                 maxPage++;
 
-            Flux<FlightItems> flightItems = Flux.range(1, maxPage).flatMap(pageNo -> {
+            Flux<FlightInfoItems> flightInfoItems = Flux.range(1, maxPage).flatMap(pageNo -> {
                 log.debug("pageNo: {}", pageNo);
-                return flightRequestService.requestFlight(pageNo);
+                return flightInfoRequestService.requestFlightInfo(pageNo);
             });
 
-            flightItems.subscribe(items ->
-                items.getFlightItems().forEach(item -> {
+            flightInfoItems.subscribe(items ->
+                items.getFlightInfoItems().forEach(item -> {
                     log.debug("item: {}", items.toString());
                     addBoard(item);
                 })
@@ -46,8 +46,8 @@ public class FlightService {
         });
     }
 
-    public Optional<Flight> addBoard(FlightItem item) {
-        Flight flight = Flight.builder()
+    public Optional<FlightInfo> addBoard(FlightInfoItem item) {
+        FlightInfo flightInfo = FlightInfo.builder()
                 .airlineNm(item.getAirlineNm())
                 .arrAirportNm(item.getArrAirportNm())
                 .arrPlandTime(item.getArrPlandTime())
@@ -55,8 +55,8 @@ public class FlightService {
                 .depPlandTime(item.getDepPlandTime())
                 .vihicleId(item.getVihicleId())
                 .build();
-        flightRepository.save(flight);
-        return Optional.of(flightRepository.save(flight));
+        flightInfoRepository.save(flightInfo);
+        return Optional.of(flightInfoRepository.save(flightInfo));
     }
 
 }

@@ -7,19 +7,19 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.mhkim.opendata.config.OpendataProp;
-import com.mhkim.opendata.dto.FlightItems;
+import com.mhkim.opendata.dto.FlightInfoItems;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Service
-public class FlightRequestService {
+public class FlightInfoRequestService {
 
     private final WebClient tagoWebClient;
     private final OpendataProp opendataProp;
 
-    public Mono<FlightItems> requestFlight(int pageNo) {
+    public Mono<FlightInfoItems> requestFlightInfo(int pageNo) {
         MultiValueMap<String, String> queryParams = getQueryParams(pageNo);
         
         return tagoWebClient.get()
@@ -28,7 +28,7 @@ public class FlightRequestService {
                         .build()
                 )
                 .accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class)
-                .flatMap(data -> Mono.just(new FlightItems(data)));
+                .flatMap(data -> Mono.just(new FlightInfoItems(data)));
     }
 
     private MultiValueMap<String, String> getQueryParams(int pageNo) {

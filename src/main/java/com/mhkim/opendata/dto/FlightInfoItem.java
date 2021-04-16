@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlightItem {
+public class FlightInfoItem {
 
     private String airlineNm;
     private String arrAirportNm;

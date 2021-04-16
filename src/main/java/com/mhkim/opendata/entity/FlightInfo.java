@@ -23,12 +23,12 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "flight")
-public class Flight {
+@Table(name = "flightinfo")
+public class FlightInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long flightId;
+    private Long flightinfoId;
 
     @Column(length = 100)
     private String airlineNm;
@@ -56,10 +56,10 @@ public class Flight {
 
     @Builder
     @PersistenceConstructor
-    public Flight(Long flightId, String airlineNm, String arrAirportNm, String arrPlandTime, String depAirportNm,
+    public FlightInfo(Long flightinfoId, String airlineNm, String arrAirportNm, String arrPlandTime, String depAirportNm,
             String depPlandTime, String vihicleId, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 
-        this.flightId = flightId;
+        this.flightinfoId = flightinfoId;
         this.airlineNm = airlineNm;
         this.arrAirportNm = arrAirportNm;
         this.arrAirportNm = arrPlandTime;
