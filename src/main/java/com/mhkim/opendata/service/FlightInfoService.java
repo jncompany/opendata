@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.mhkim.opendata.dto.FlightInfoItem;
-import com.mhkim.opendata.dto.FlightInfoItems;
+import com.mhkim.opendata.dto.FlightInfoItemDto;
+import com.mhkim.opendata.dto.FlightInfoItemsDto;
 import com.mhkim.opendata.entity.FlightInfo;
 import com.mhkim.opendata.repository.FlightInfoRepository;
 
@@ -32,7 +32,7 @@ public class FlightInfoService {
             if (total % numOfRows > 0)
                 maxPage++;
 
-            Flux<FlightInfoItems> flightInfoItems = Flux.range(1, maxPage).flatMap(pageNo -> {
+            Flux<FlightInfoItemsDto> flightInfoItems = Flux.range(1, maxPage).flatMap(pageNo -> {
                 log.debug("pageNo: {}", pageNo);
                 return flightInfoRequestService.requestFlightInfo(pageNo);
             });
@@ -40,13 +40,13 @@ public class FlightInfoService {
             flightInfoItems.subscribe(items ->
                 items.getFlightInfoItems().forEach(item -> {
                     log.debug("item: {}", items.toString());
-                    addBoard(item);
+                    addFlightInfo(item);
                 })
             );
         });
     }
 
-    public Optional<FlightInfo> addBoard(FlightInfoItem item) {
+    public Optional<FlightInfo> addFlightInfo(FlightInfoItemDto item) {
         FlightInfo flightInfo = FlightInfo.builder()
                 .airlineNm(item.getAirlineNm())
                 .arrAirportNm(item.getArrAirportNm())
@@ -55,7 +55,7 @@ public class FlightInfoService {
                 .depPlandTime(item.getDepPlandTime())
                 .vihicleId(item.getVihicleId())
                 .build();
-        flightInfoRepository.save(flightInfo);
+        
         return Optional.of(flightInfoRepository.save(flightInfo));
     }
 

@@ -11,19 +11,19 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class FlightInfoItems {
+public class FlightInfoItemsDto {
 
-    private List<FlightInfoItem> flightInfoItems;
+    private List<FlightInfoItemDto> flightInfoItems;
     private int numOfRows;
     private int pageNo;
     private int totalCount;
 
-    public FlightInfoItems(String jsonData) {
+    public FlightInfoItemsDto(String jsonData) {
         JsonObject jsonObject = new Gson().fromJson(jsonData, JsonObject.class);
         JsonObject bodyObject = jsonObject.get("response").getAsJsonObject().get("body").getAsJsonObject();
 
         String itemJson = bodyObject.get("items").getAsJsonObject().get("item").toString();
-        this.flightInfoItems = new Gson().fromJson(itemJson, new TypeToken<List<FlightInfoItem>>() {}.getType());
+        this.flightInfoItems = new Gson().fromJson(itemJson, new TypeToken<List<FlightInfoItemDto>>() {}.getType());
 
         this.numOfRows = bodyObject.get("numOfRows").getAsInt();
         this.pageNo = bodyObject.get("pageNo").getAsInt();
